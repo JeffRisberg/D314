@@ -1,3 +1,10 @@
+// As of 4/17/14, this copy has the following fixes/enhancements:
+//  - Corrected bar drawing multiBarHorizontalChart when forceY is [] (allows for not including zero)
+//  - Added option in stackedAreaChart to support forceY
+//  - In line chart, line width can be specified to drive highlights
+//  - In line chart, use-points option has been added 
+//
+
 (function () {
 
   var nv = window.nv || {};
@@ -5264,6 +5271,7 @@
       .size(16) // default size
       .sizeDomain([16, 256]) //set to speed up calculation, needs to be unset if there is a custom size accessor
     ;
+    scatter.useVoronoi(false);
 
     //============================================================
 
@@ -5400,7 +5408,6 @@
               .y1(function (d, i) {
                 return y(y.domain()[0] <= 0 ? y.domain()[1] >= 0 ? 0 : y.domain()[1] : y.domain()[0])
               })
-              //.y1(function(d,i) { return y0(0) }) //assuming 0 is within y domain.. may need to tweak this
               .apply(this, [d.values])
           });
 
@@ -5408,51 +5415,12 @@
           .data(function (d) {
             return [d]
           });
-
-        if (d['use-points']) {
-          linePaths.enter().append('path')
-            .attr('class', 'nv-line')
-
-            .attr('d', function (d) {
-              return d3.svg.circle()
-                .interpolate(interpolate)
-                .defined(defined)
-                .x(function (d, i) {
-                  return nv.utils.NaNtoZero(x0(getX(d, i)))
-                })
-                .y(function (d, i) {
-                  return nv.utils.NaNtoZero(y0(getY(d, i)))
-                })
-                .width(1)
-                .height(1)
-                .apply(this, [d.values])
-            });
-
-          linePaths
-            .transition()
-            .attr('d', function (d) {
-              return d3.svg.circle()
-                .interpolate(interpolate)
-                .defined(defined)
-                .x(function (d, i) {
-                  return nv.utils.NaNtoZero(x(getX(d, i)))
-                })
-                .y(function (d, i) {
-                  return nv.utils.NaNtoZero(y(getY(d, i)))
-                })
-                .width(5)
-                .height(5)
-                .apply(this, [d.values])
-            });
-        }
-        else {
-          linePaths.enter().append('path')
-            .attr('class', 'nv-line')
-
-            .style('stroke-width', function (d) {
-              if (d['stroke-width']) return d['stroke-width'];
-            })
-            .attr('d', function (d) {
+       
+        linePaths.enter().append('path')
+          .attr('class', 'nv-line')
+          .style('stroke-width', function(d) { if(d['stroke-width']) return d['stroke-width']; })
+          .attr('d', function (d) {
+            if (d['use-points'] == null) {              
               return d3.svg.line()
                 .interpolate(interpolate)
                 .defined(defined)
@@ -5461,26 +5429,30 @@
                 })
                 .y(function (d, i) {
                   return nv.utils.NaNtoZero(y0(getY(d, i)))
-                })
+                })               
                 .apply(this, [d.values])
-            });
-
-          linePaths
-            .transition()
-            .attr('d', function (d) {
-              return d3.svg.line()
-                .interpolate(interpolate)
-                .defined(defined)
+            }
+          });
+          
+        linePaths.enter().append('path')
+          .attr('class', 'nv-line')
+          .style("stroke-dasharray", 
+              function(d) { return d['stroke-width'] ? (d['stroke-width'], 10) : ("4, 10"); })                 
+          .style('stroke-width', 
+              function(d) { return d['stroke-width'] ? d['stroke-width'] : 4; })          
+          .attr('d', function (d) {           
+            if (d['use-points'] != null) {                           
+              return d3.svg.line()                        
                 .x(function (d, i) {
-                  return nv.utils.NaNtoZero(x(getX(d, i)))
-                })
+                  return nv.utils.NaNtoZero(x0(getX(d, i)))
+                })                           
                 .y(function (d, i) {
-                  return nv.utils.NaNtoZero(y(getY(d, i)))
-                })
+                  return nv.utils.NaNtoZero(y0(getY(d, i)))
+                })                          
                 .apply(this, [d.values])
-            });
-        }
-
+            }
+          });
+        
         //store old scales for use in transitions on update
         x0 = x.copy();
         y0 = y.copy();

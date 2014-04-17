@@ -73,38 +73,34 @@
       });
 
       nv.addGraph(function () {
-            var chart = nv.models.stackedAreaChart()
-                .showControls(false);   //Don't let user switch between styles on the chart.
+        var chart = nv.models.stackedAreaChart()
+            .showControls(false);   //Don't let user switch between styles on the chart.
 
-            chart.style(style);
+        chart.style(style);
 
-            if (includeZero) {
-              chart.forceY([0]);
-            }
-            else {
-              chart.forceY([]);
-            }
+        if (includeZero) {
+          chart.forceY([0]);
+        }
+        else {
+          chart.forceY([]);
+        }
 
-            chart.yAxis
-                .tickFormat(d3.format(',.1f'));
+        chart.yAxis
+            .tickFormat(d3.format(',.1f'));
 
-            $('#chart1 svg').empty();
+        $('#chart1 svg').empty();
 
-            d3.select('#chart1 svg')
-                .datum(accountsList)
-                .transition().duration(500)
-                .call(chart);
+        d3.select('#chart1 svg')
+            .datum(accountsList)
+            .transition().duration(500)
+            .call(chart);
 
-            nv.utils.windowResize(chart.update);
+        nv.utils.windowResize(chart.update);
 
-            return chart;
-          }
-
-      )
-      ;
+        return chart;
+      });
     }
-  })
-  ;
+  });
 </script>
 </body>
 </html>
