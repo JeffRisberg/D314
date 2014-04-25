@@ -3,3 +3,11 @@
 */logs/!index.html
 */cache/*
 */cache/!index.html
+
+# intellij
+*.eml
+*.iml
+*.ipr
+*.iws
+.*.sw?
+.idea
